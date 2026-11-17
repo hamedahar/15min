@@ -419,8 +419,7 @@ function buildForm(raw,editId,started,geo){
   const h=el('h2');fTitle=el('span');h.appendChild(fTitle);fq.appendChild(h);
   fIn=el('input');fIn.type='text';fIn.placeholder='مثلاً: مهندسی عمران';
   fIn.oninput=()=>{A.field=fIn.value.trim();A.field?fq.classList.add('done'):fq.classList.remove('done');prog()};
-  const b=el('button','btn','تأیید ✓');b.type='button';b.onclick=()=>{if(A.field)done(fq)};
-  fq.append(fIn,b);app.appendChild(fq);
+  fq.append(fIn);app.appendChild(fq);
   RS.push(R=>{if(R.field){fIn.value=R.field;fIn.oninput()}})})();
  single('job','فعالیت',['شاغل','دانشجو','دانش‌آموز','خانه‌دار','بازنشسته','بیکار','سایر']);
  multi('vehicle','وسیله نقلیه شخصی',['خودرو شخصی','خودرو خانواده','دوچرخه','موتورسیکلت','اسکوتر و …','ندارم']);
@@ -441,19 +440,17 @@ function buildForm(raw,editId,started,geo){
   gb.onclick=()=>{st.textContent='در حال دریافت موقعیت…';try{navigator.geolocation.getCurrentPosition(p=>{const ll={lat:p.coords.latitude,lng:p.coords.longitude};put(mode,ll);if(m)m.setView([ll.lat,ll.lng],15)},()=>st.textContent='دسترسی به موقعیت ممکن نشد؛ روی نقشه لمس کنید.',{timeout:8000})}catch(e){st.textContent='دسترسی به موقعیت ممکن نشد.'}};
   const g=el('div','loc');
   [['home','نام محله/خیابان سکونت (اختیاری)'],['work','نام محله/خیابان محل فعالیت (اختیاری)']].forEach(([k,l])=>{const lb=el('label',null,l);const i=el('input');i.type='text';i.oninput=()=>{A.loc[k].text=i.value;chk()};li[k]=i;g.append(lb,i)});
-  const nb=el('button','btn','تأیید ✓');nb.type='button';nb.onclick=()=>chk();
-  q.append(seg,host,st,gb,g,nb);
+  q.append(seg,host,st,gb,g);
   RS.push(R=>{const L0=R.loc||{};
    ['home','work'].forEach(k=>{const o=L0[k]||{};if(o.lat!=null)put(k,{lat:o.lat,lng:o.lng});if(o.text){li[k].value=o.text;A.loc[k].text=o.text}});
    setMode('home');st.textContent='';chk();if(m&&L0.home&&L0.home.lat!=null)m.setView([L0.home.lat,L0.home.lng],14)})})();
 
- (()=>{const q=Q('مدت زمان سکونت در این محله','به سال');A.years=0;const s=el('div','step');
-  const m=el('button',null,'−'),p=el('button',null,'+'),i=el('input');i.type='number';i.min=0;i.value=0;i.inputMode='numeric';m.type=p.type='button';
+ (()=>{const q=Q('مدت زمان سکونت در این محله','به سال');const s=el('div','step');
+  const m=el('button',null,'−'),p=el('button',null,'+'),i=el('input');i.type='number';i.min=0;i.value='';i.placeholder='۰';i.inputMode='numeric';m.type=p.type='button';
   const set=v=>{v=Math.max(0,Math.min(99,+v||0));i.value=v;A.years=v;done(q)};
-  m.onclick=()=>set(+i.value-1);p.onclick=()=>set(+i.value+1);i.onchange=()=>set(i.value);
+  m.onclick=()=>set(+i.value-1);p.onclick=()=>set(+i.value+1);i.oninput=()=>{if(i.value!==''){A.years=Math.max(0,Math.min(99,+i.value||0));done(q)}else{delete A.years;q.classList.remove('done');prog()}};i.onchange=()=>{if(i.value!=='')set(i.value)};
   s.append(m,i,p,el('span',null,'سال'));q.appendChild(s);
-  const b=el('button','btn','تأیید ✓');b.type='button';b.onclick=()=>set(i.value);q.appendChild(b);
-  RS.push(R=>{if(R.years!=null&&R.years!==0)set(R.years)})})();
+  RS.push(R=>{if(R.years!=null)set(R.years)})})();
 
  /* Q9: services */
  (()=>{N++;const h=el('section','card');const t=el('h2');t.append(el('b',null,FA(N)+'.'),'خدمات و نیازهای روزمره');h.append(t,el('p','hint','برای هر خدمت فقط یک گزینه را لمس کنید؛ اگر از آن استفاده نمی‌کنید، «استفاده نمی‌کنم» را بزنید.'));app.appendChild(h);
@@ -486,7 +483,7 @@ function buildForm(raw,editId,started,geo){
     sec('مدت زمان رفت‌وآمد');
     H.dur=chips(DU,false,v=>{S.duration=v[0];if(k==='in')finish()});det.appendChild(H.dur);
     if(k==='out'){sec('اگر این خدمت در ۱۵ دقیقه‌ای محل سکونت شما بود، استفاده می‌کردید؟');H.wu=chips(WU,false,v=>{S.wouldUse=v[0];finish()});det.appendChild(H.wu)}
-    const b=el('button','btn ghost','تأیید ✓');b.type='button';b.onclick=finish;det.appendChild(b)}
+    }
    q.append(seg,det);app.appendChild(q);
    RS.push(R=>{const r=(R.services||{})[name];if(!r||!r.where)return;
     const sb=[...seg.querySelectorAll('button')].find(x=>x.textContent===r.where);if(!sb)return;sb.click();
